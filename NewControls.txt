@@ -1,0 +1,15 @@
+Manipulator:
+	Button 9: Hold current position. (prevents backdriving)
+	Button 11: Go to Ground Preset.
+	Button 10: Go to Hanging Preset.
+
+Driver: (press each button on BOTH sticks simultaneously)
+	Button 3: Face Forward. (gyro-controlled)
+	Button 2: Face Reversed. (gyro-controlled)
+	Button 5: Reset Gyro. (make the current position "forward")
+
+In addition to charging the compressor and snapping the gripper
+into place, autonomous mode now additionally lowers the arm to
+the ground, using PID for smooth-yet-quick control, so when
+teleop mode begins, the driver can immediately start collecting
+rings.
