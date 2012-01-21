@@ -50,8 +50,8 @@
 		#define DRIVER_GYRO_REVERSE_BUTTON 2
 
 /* Potentiometer Calibration */
-	#define POTENTIOMETER_VOLTAGE_FULLY_FORWARD 1.56
-	#define POTENTIOMETER_VOLTAGE_FULLY_BACKWARD 4.01
+	#define POTENTIOMETER_VOLTAGE_FULLY_FORWARD 0.068
+	#define POTENTIOMETER_VOLTAGE_FULLY_BACKWARD 2.45
 
 /* Actuator polarity and speed configuration. */
 	#define GYRO_DRIVE_POWER 0.9
@@ -143,7 +143,7 @@ class Robot2011Crush : public SimpleRobot {
 	DoubleSolenoid solenoidShifter;
 
 	public:
-		Robot2011Crush():
+		Robot2011Crush(void):
 			joystickManipulator(MANIPULATOR_JOYSTICK_USB_PORT),
 			joystickDriveLeft(LEFT_DRIVE_JOYSTICK_USB_PORT),
 			joystickDriveRight(RIGHT_DRIVE_JOYSTICK_USB_PORT),
@@ -178,46 +178,50 @@ class Robot2011Crush : public SimpleRobot {
 			return (IsInRange(xValue, upperBand, lowerBand)) ? (correctedValue) : (xValue);
 		}
 		
-		void Autonomous() {
+		void Autonomous(void) {
 			GetWatchdog().SetEnabled(false); // No need for Watchdog in Autonomous, either.
 			compressorPump->Start(); // Let's start up the compressor and charge up for Teleop.
 
-			bool boolSnappedArm = false; // Set that.
-			bool boolWentThere = false; // And that.
-
+			UINT8 state = 0;
+			
 			/* PID Control */
 				PIDSourceArm *pidSourceArm = new PIDSourceArm(&analogPotentiometer);
 				PIDController *pidArmController = new PIDController(1.3, 0.0, 1.6, pidSourceArm, new PIDOutputArm(&motorArmLift1, &motorArmLift2, DriverStationLCD::GetInstance()));
 
 				pidArmController->SetSetpoint(0.75);
 
-			/* Start up the timer. */
+			/* Set up the timer. */
 				Timer* timerSnapArm = new Timer();
-
-				timerSnapArm->Reset();
-				timerSnapArm->Start();
 				
 			while(IsAutonomous() && IsEnabled()) {
-				/* Snap the arm into position. */
-					if(!boolSnappedArm) {
-						if(timerSnapArm->Get() >= 0.6) boolSnappedArm = true; else motorArmExtend.Set(ARM_EXTEND_SPEED_AUTONOMOUS);
-					} else {
-						if(!boolWentThere) {
-							boolWentThere = true;
-							
+				switch(state) {
+					case 0:
+						motorArmExtend.Set(ARM_EXTEND_SPEED_AUTONOMOUS);
+						
+						timerSnapArm->Start();
+						state++;
+						
+						break;
+					case 1:
+						if(timerSnapArm->Get() >= 0.6) state++;
+						break;
+					case 2:
 							timerSnapArm->Reset();
 							
 							motorArmExtend.Set(ARM_RETRACT_SPEED_AUTONOMOUS);
 							pidArmController->Enable();
-						} else {
-							if(timerSnapArm->Get() >= 0.3) motorArmExtend.Set(0);
-							
-							if(timerSnapArm->Get() >= 0.6) {
+							state++;
+					case 3: 
+						if(timerSnapArm->Get() >= 0.3) motorArmExtend.Set(0);
+
+						if(timerSnapArm->Get() >= 0.6) {
 								timerSnapArm->Stop();
 								pidArmController->Disable();
-							}
+								
 						}
-					}
+						
+						break;
+				}
 
 				/* If nothing's left to do, sit around and keep the compressor running. */
 			}
@@ -225,7 +229,7 @@ class Robot2011Crush : public SimpleRobot {
 			compressorPump->Stop(); // Okay, fun's over
 		}
 
-		void OperatorControl() {
+		void OperatorControl(void) {
 			GetWatchdog().SetEnabled(true); // We do want Watchdog in Teleop, though.
 			compressorPump->Start(); // Let's start up the compressor too, while we're at it.
 
@@ -267,8 +271,8 @@ class Robot2011Crush : public SimpleRobot {
 				dsLCD->Printf(DriverStationLCD::kUser_Line4, 1, "                 ");
 				dsLCD->Printf(DriverStationLCD::kUser_Line5, 1, "                 ");
 				dsLCD->Printf(DriverStationLCD::kUser_Line6, 1, "                 ");
-				dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "---Potentiometer---", analogPotentiometer.GetVoltage());
-				dsLCD->Printf(DriverStationLCD::kUser_Line4, 1, "---PID Control---", analogPotentiometer.GetVoltage());
+				dsLCD->Printf(DriverStationLCD::kUser_Line1, 1, "---Potentiometer---");
+				dsLCD->Printf(DriverStationLCD::kUser_Line4, 1, "---PID Control---");
 				dsLCD->Printf(DriverStationLCD::kUser_Line5, 1, "Status: Disabled");
 				dsLCD->Printf(DriverStationLCD::kUser_Line6, 1, "Output: 0.000000");
 			
@@ -348,7 +352,7 @@ class Robot2011Crush : public SimpleRobot {
 							if((boolTopPreset || boolBottomPreset) && !(boolTopPreset && boolBottomPreset)) { // Is a preset button pressed?
 								if(boolTopPreset && stateActivePreset!=1) { // Go to the ground preset.
 									stateActivePreset = 1;
-									pidArmController->SetSetpoint(0.80);
+									pidArmController->SetSetpoint(0.70);
 									pidArmController->Enable();
 									dsLCD->Printf(DriverStationLCD::kUser_Line5, 1, "                 ");
 									dsLCD->Printf(DriverStationLCD::kUser_Line5, 1, "Status: Ground");
@@ -433,6 +437,7 @@ class Robot2011Crush : public SimpleRobot {
 							}
 						} else {
 							timerMinibotDrop->Stop();
+							boolMinibotTimer = false;
 							solenoidMinibotDrop.Set(SOLENOID_MINIBOT_DROP_OFF_DIRECTION);
 						}
 
@@ -448,6 +453,11 @@ class Robot2011Crush : public SimpleRobot {
 			pidArmController->Disable(); // Turn off the PID control, otherwise it'll keep running.
 			compressorPump->Stop(); // We're disabling now, so let's switch off the compressor, for safety reasons.
 			GetWatchdog().SetEnabled(false); // Teleop is done, so let's turn off Watchdog.
+		}
+		
+		void Disabled(void) {
+			GetWatchdog().SetEnabled(false);
+			compressorPump->Stop();
 		}
 	};
 
