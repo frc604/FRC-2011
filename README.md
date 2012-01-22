@@ -7,7 +7,7 @@ This is [FRC Team 604](http://604robotics.com/)'s 2010 robot code, rewritten fro
 
 ### "Special" Features
 
- - **Dual-mode arm control**, with manual and single-button PID-controlled preset modes.
+ - **Dual-mode arm control**, with manual and single-button PID-controlled preset modes, and a button to hold in the current position.
  - **Gyro-based driving**, with one button to face the robot forward, one to face it in the opposite direction, and one to reset the position that is considered "forward".
 
 ### Not-So-Special Features
