@@ -14,3 +14,7 @@ This is [FRC Team 604](http://604robotics.com/)'s 2010 robot code, rewritten fro
  - Example of compressor/pneumatics code.
  - Control code for a single-jointed arm with a pneumatic gripper and rollers.
  - Control code for a pneumatics-driven minibot deployment system.
+
+### License
+
+Licensed under the [WTFPL](https://en.wikipedia.org/wiki/WTFPL).
