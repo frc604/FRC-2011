@@ -13,4 +13,4 @@ This is [FRC Team 604](http://604robotics.com/)'s 2010 robot code, rewritten fro
  - Example of basic drive code.
  - Example of compressor/pneumatics code.
  - Control code for a single-jointed arm with a pneumatic gripper and rollers.
- - Control code for a pneumatic-driven minibot deployment system.
+ - Control code for a pneumatics-driven minibot deployment system.
