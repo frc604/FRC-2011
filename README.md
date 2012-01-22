@@ -1,7 +1,7 @@
 FRC 2011 "Barracuda"
 ===================
 
-> The robot formerly known as "Crush".
+> (The robot formerly known as "Crush".)
 
 This is [FRC Team 604](http://604robotics.com/)'s 2010 robot code, rewritten from LabVIEW into C++ with the WPILib framework.
 
