@@ -1,4 +1,4 @@
-FRC 2011 "Barracuda"
+FRC Tean 604: 2011 ["Barracuda"](http://604robotics.com/Quixilver/Robots/)
 ===================
 
 This is [FIRST Team 604](http://604robotics.com/)'s 2011 robot code, rewritten from LabVIEW into C++ with the WPILib framework.
@@ -8,7 +8,7 @@ This is [FIRST Team 604](http://604robotics.com/)'s 2011 robot code, rewritten f
  - **Dual-mode arm control**, with manual and single-button PID-controlled preset modes, and a button to hold in the current position.
  - **Gyro-based driving**, with one button to face the robot forward, one to face it in the opposite direction, and one to reset the position that is considered "forward".
 
-### Not-So-Special Features
+### Other Features
  - Example of a custom PID Source and Output.
  - Example of basic drive code.
  - Example of compressor/pneumatics code.
